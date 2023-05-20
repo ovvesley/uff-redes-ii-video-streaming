@@ -1,12 +1,192 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html class="h-full bg-gray-100">
+
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redes II - Streaming de Conteúdo</title>
-</head>
-<body>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#da373d',
+                    }
+                }
+            }
+        }
+    </script>
 
+</head>
+
+<body class="h-full">
+
+    <div class="min-h-full">
+        <nav class="bg-gray-800">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <p class="text-white">Redes II - Streaming de Conteúdo</p>
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+            </div>
+
+        </nav>
+
+
+        <header class="bg-white shadow">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900">Video 01</h1>
+            </div>
+        </header>
+        <main>
+            <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                <!-- Replace with your content -->
+                <div class="px-4 py-6 sm:px-0">
+                    <div class="border-4 border-dashed border-gray-200 rounded-lg ">
+
+                        <div class="flex">
+                            <video width="70%" height="70%" controls style="border-radius: 10px">
+                                <source src="" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+
+                            <div>
+                                <p class="text-center text-gray-500">Qualidade: <span id="quality"></span></p>
+                                <p class="text-center text-gray-500">Buffer: <span id="buffered"></span></p>
+                                <p class="text-center text-gray-500">Buffer: <span id="bufferedPercent"></span></p>
+                                <canvas id="buffered-graph" width="200" height="100"></canvas>
+                                <hr />
+                                <p class="text-center text-gray-500">Corrupted Video Frames: <span
+                                        id="corruptedVideoFrames"></span></p>
+                                <p class="text-center text-gray-500">Total Video Frames: <span
+                                        id="totalVideoFrames"></span></p>
+                                <p class="text-center text-gray-500">Dropped Video Frames: <span
+                                        id="droppedVideoFrames"></span></p>
+                                <hr />
+
+
+
+                            </div>
+                        </div>
+
+
+                        <div class="bg-gray-800 rounded p-2 mt-5 mb-10">
+                            <div class="inline-flex rounded-md shadow-sm" role="group">
+                                <button type="button" id="button-low-quality"
+                                    class="mx-2 px-4 py-2  bg-white border rounded-md button-quality">
+                                    Baixa Qualidade
+                                </button>
+                                <button type="button" id="button-medium-quality"
+                                    class="mx-2 px-4 py-2  bg-white border rounded-md button-quality">
+                                    Media Qualidade
+                                </button>
+                                <button type="button" id="button-high-quality"
+                                    class="mx-2 px-4 py-2  bg-white border rounded-md button-quality">
+                                    Alta Qualidade
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
+
+<script>
+    const buttonLowQuality = document.querySelector('#button-low-quality');
+    const buttonMediumQuality = document.querySelector('#button-medium-quality');
+    const buttonHighQuality = document.querySelector('#button-high-quality');
+
+
+
+    buttonLowQuality.addEventListener('click', () => {
+        handleChangeQuality('low');
+    });
+
+    buttonMediumQuality.addEventListener('click', () => {
+        handleChangeQuality('medium');
+    });
+
+    buttonHighQuality.addEventListener('click', () => {
+        handleChangeQuality('high');
+    });
+
+    const handleChangeQuality = (quality) => {
+        const video = document.querySelector('video');
+        const currentTime = video.currentTime;
+        video.src = `/streaming-video?videoName=avatar-2&quality=${quality}`;
+        video.currentTime = currentTime;
+        video.play();
+        document.querySelector('#quality').innerHTML = quality === 'high' ? 'Alta' : quality === 'medium' ? 'Media' : 'Baixa';
+        document.querySelectorAll('.button-quality').forEach((button) => {
+            button.classList.remove('bg-green-500');
+        });
+        document.querySelector(`#button-${quality}-quality`).classList.add('bg-green-500');
+    }
+
+
+    const video = document.querySelector('video');
+
+
+    video.addEventListener('timeupdate', () => {
+      
+        debuggerBuffer();
+        debuggerFps();
+
+
+    });
+
+
+    const debuggerBuffer = () => {
+        const buffered = video.buffered;
+
+        if (buffered.length === 0) {
+            return;
+        }
+        const currentTime = video.currentTime;
+        const duration = video.duration;
+        const bufferedEnd = buffered.end(buffered.length - 1);
+        const bufferedStart = buffered.start(buffered.length - 1);
+        const bufferedPercentage = ((bufferedEnd - bufferedStart) / duration) * 100;
+        document.querySelector('#bufferedPercent').innerHTML = `${bufferedPercentage.toFixed(2)}%`;
+        document.querySelector('#buffered').innerHTML = `${bufferedEnd.toFixed(2)}s`;
+
+
+        const canvas = document.querySelector('#buffered-graph');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+        ctx.fillRect(0, 0, (bufferedPercentage * canvas.width) / 100, 10);
+    }
+    const debuggerFps = () => {
+        const videoQuality = video.getVideoPlaybackQuality();
+        const corruptedVideoFrames = videoQuality.corruptedVideoFrames;
+        const totalVideoFrames = videoQuality.totalVideoFrames;
+        const droppedVideoFrames = videoQuality.droppedVideoFrames;
+        document.querySelector('#corruptedVideoFrames').innerHTML = corruptedVideoFrames;
+        document.querySelector('#totalVideoFrames').innerHTML = totalVideoFrames;
+        document.querySelector('#droppedVideoFrames').innerHTML = droppedVideoFrames;
+    }
+
+    
+
+
+</script>
+
 </html>
