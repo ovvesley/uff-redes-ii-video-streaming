@@ -48,9 +48,15 @@
 
         <header class="bg-white shadow">
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                <h1 class="text-3xl font-bold tracking-tight text-gray-900">Video 01</h1>
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900">Streaming Videos</h1>
             </div>
         </header>
+
+        <!-- videos list -->
+        <div class=" mx-auto max-w-7xl py-6 sm:px-6 lg:px-8 flex" id="videoListContainer">
+
+        </div>
+
         <main>
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
                 <!-- Replace with your content -->
@@ -107,11 +113,61 @@
 </body>
 
 <script>
+
+    function getVideoName(){
+        const video = document.querySelector('video');
+        const videoName  = new URLSearchParams(video.src.split('?')[1]).get('videoName');
+        return videoName;
+    }
+
     const buttonLowQuality = document.querySelector('#button-low-quality');
     const buttonMediumQuality = document.querySelector('#button-medium-quality');
     const buttonHighQuality = document.querySelector('#button-high-quality');
 
+    const videos = [
+        {
+            'title': 'Video 00 - Interestellar',
+            'videoName': 'video-00',
+            'qualities': [
+                {
+                    'quality': 'low',
+                    'url': '/streaming-video?videoName=video-00&quality=low'
+                },
+                {
+                    'quality': 'medium',
+                    'url': '/streaming-video?videoName=video-00&quality=medium'
+                },
+                {
+                    'quality': 'high',
+                    'url': '/streaming-video?videoName=video-00&quality=high'
+                }
+            ]
+        },
 
+        {
+            'title': 'Video 01 - Sherek 3',
+            'videoName': 'video-01',
+            'qualities': [
+                {
+                    'quality': 'low',
+                    'url': '/streaming-video?videoName=video-01&quality=low'
+                },
+                {
+                    'quality': 'medium',
+                    'url': '/streaming-video?videoName=video-01&quality=medium'
+                },
+                {
+                    'quality': 'high',
+                    'url': '/streaming-video?videoName=video-01&quality=high'
+                }
+            ]
+        }
+    ];
+    const videoListContainer = document.querySelector('#videoListContainer');
+
+    const htmlVideosList = videos.map(makeVideoCard).join('');
+
+    videoListContainer.innerHTML = htmlVideosList;
 
     buttonLowQuality.addEventListener('click', () => {
         handleChangeQuality('low');
@@ -125,10 +181,20 @@
         handleChangeQuality('high');
     });
 
+    const buttonsWatch = document.querySelectorAll('.button-watch');
+    buttonsWatch.forEach(el => {
+        el.addEventListener('click',  (element) => {
+            handleChangeVideo(element.target.dataset.videoName);
+        })
+    })
+
     const handleChangeQuality = (quality) => {
         const video = document.querySelector('video');
         const currentTime = video.currentTime;
-        video.src = `/streaming-video?videoName=avatar-2&quality=${quality}`;
+
+        const videoName = getVideoName();
+
+        video.src = `/streaming-video?videoName=${videoName}&quality=${quality}`;
         video.currentTime = currentTime;
         video.play();
         document.querySelector('#quality').innerHTML = quality === 'high' ? 'Alta' : quality === 'medium' ? 'Media' : 'Baixa';
@@ -136,14 +202,13 @@
             button.classList.remove('bg-green-500');
         });
         document.querySelector(`#button-${quality}-quality`).classList.add('bg-green-500');
+        
     }
-
-
     const video = document.querySelector('video');
 
 
     video.addEventListener('timeupdate', () => {
-      
+
         debuggerBuffer();
         debuggerFps();
 
@@ -184,7 +249,46 @@
         document.querySelector('#droppedVideoFrames').innerHTML = droppedVideoFrames;
     }
 
-    
+
+
+    function handleChangeVideo(videoName){
+        const video = document.querySelector('video');
+        const currentTime = video.currentTime;
+        video.src = `/streaming-video?videoName=${videoName}&quality=low`;
+        handleChangeQuality('low')
+        document.querySelectorAll('.button-watch').forEach((button) => {
+            button.classList.add('bg-red-500');
+        });
+        document.querySelector(`#videoCard-${videoName} .button-watch`).classList.remove('bg-red-500');
+        
+    }
+
+    function makeVideoCard(video) {
+        return `
+        <div class="max-w-sm rounded overflow-hidden shadow-lg mx-2" id="videoCard-${video.videoName}">
+            <div class="px-6 py-4">
+                <div class="font-bold text-xl mb-2">${video.title}</div>
+            </div>
+            <div class="px-6 pt-4 pb-2">
+                ${video.qualities.map((quality) => {
+            return `
+                    <button type="button" 
+                        class="mx-2 px-4 py-2  bg-white border rounded-lg button-quality">
+                        ${quality.quality}
+                    </button>
+                    `
+        }).join('')}
+            </div>
+            <button type="button" 
+                class="mx-2 px-4 py-2 bg-red-500 text-white border rounded-lg button-watch"
+                data-video-name="${video.videoName}"
+                >
+                Assistir
+            </button>
+        </div>
+        `
+    }
+
 
 
 </script>
