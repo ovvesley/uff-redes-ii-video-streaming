@@ -1,17 +1,12 @@
 const express = require("express");
-const fs = require("fs");
-const streamingVideoService = require("./services/StreamingVideoService");
-const { STATUS_CODES } = require("http");
+const streamingVideoService = require("./services/streamingVideoService");
+const { env } = require("process");
 
 const app = express();
-const port = 3000;
+const port = env.PORT || 3000;
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html");
-});
-
-app.get("/live", (req, res) => {
-  res.sendFile(__dirname + "/public/live.html");
 });
 
 app.get("/streaming-video", (req, res) => {
@@ -25,8 +20,7 @@ app.get("/streaming-video", (req, res) => {
 
   const startRange = Number(range.replace(/\D/g, "")) || 0;
 
-  const { videoChunkStream, startChunk, endChunk, videoSize, contentLength } =
-    streamingVideoService.getVideoStream(videoName, quality, startRange);
+  const { videoChunkStream, startChunk, endChunk, videoSize, contentLength } = streamingVideoService.getVideoStream(videoName, quality, startRange);
 
   const headers = {
     "Content-Range": `bytes ${startChunk}-${endChunk}/${videoSize}`,

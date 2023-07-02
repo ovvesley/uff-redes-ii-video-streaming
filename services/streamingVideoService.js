@@ -48,5 +48,5 @@ const getVideoStream = (videoName = "avatar-2", quality = "medium", startChunk) 
 };
 
 module.exports = {
-  getVideoStream,
+  getVideoStream: getVideoStream,
 };

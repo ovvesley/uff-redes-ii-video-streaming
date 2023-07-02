@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
+  "type": "commonjs",
+  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --watch app.js"
+    "start-dev": "node --watch app.js",
+    "start-prod": "PORT=80 node app.js"
   },
-  "author": "",
+  "author": "Wesley Ferreira",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.2"
