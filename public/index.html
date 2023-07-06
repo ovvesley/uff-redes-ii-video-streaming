@@ -64,8 +64,8 @@
                     <div class="border-4 border-dashed border-gray-200 rounded-lg ">
 
                         <div class="flex">
-                            <video width="70%" height="70%" controls style="border-radius: 10px">
-                                <source src="" type="video/mp4">
+                            <video width="70%" height="70%" controls style="border-radius: 10px" type="*">
+                                <source src="" type="*">
                                 Your browser does not support the video tag.
                             </video>
 
@@ -115,8 +115,8 @@
 <script>
 
     function getVideoName(){
-        const video = document.querySelector('video');
-        const videoName  = new URLSearchParams(video.src.split('?')[1]).get('videoName');
+        const source = document.querySelector('video source');
+        const videoName  = new URLSearchParams(source.src.split('?')[1]).get('videoName');
         return videoName;
     }
 
@@ -190,11 +190,13 @@
 
     const handleChangeQuality = (quality) => {
         const video = document.querySelector('video');
+        const source = document.querySelector('video source');
         const currentTime = video.currentTime;
 
         const videoName = getVideoName();
 
         video.src = `/streaming-video?videoName=${videoName}&quality=${quality}`;
+        source.src = `/streaming-video?videoName=${videoName}&quality=${quality}`;
         video.currentTime = currentTime;
         video.play();
         document.querySelector('#quality').innerHTML = quality === 'high' ? 'Alta' : quality === 'medium' ? 'Media' : 'Baixa';
@@ -253,8 +255,10 @@
 
     function handleChangeVideo(videoName){
         const video = document.querySelector('video');
+        const source = document.querySelector('video source');
         const currentTime = video.currentTime;
         video.src = `/streaming-video?videoName=${videoName}&quality=low`;
+        source.src = `/streaming-video?videoName=${videoName}&quality=low`;
         handleChangeQuality('low')
         document.querySelectorAll('.button-watch').forEach((button) => {
             button.classList.add('bg-red-500');
@@ -270,14 +274,7 @@
                 <div class="font-bold text-xl mb-2">${video.title}</div>
             </div>
             <div class="px-6 pt-4 pb-2">
-                ${video.qualities.map((quality) => {
-            return `
-                    <button type="button" 
-                        class="mx-2 px-4 py-2  bg-white border rounded-lg button-quality">
-                        ${quality.quality}
-                    </button>
-                    `
-        }).join('')}
+               
             </div>
             <button type="button" 
                 class="mx-2 px-4 py-2 bg-red-500 text-white border rounded-lg button-watch"
